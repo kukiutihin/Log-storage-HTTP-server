@@ -1,0 +1,17 @@
+<project>
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>kuki</groupId>
+    <artifactId>LoggerHttp</artifactId>
+    <version>1.0</version>
+
+    <properties>
+        <src.dir>src/logHttp/main</src.dir>
+        <maven.compiler.release>21</maven.compiler.release>
+    </properties>
+
+    <build>
+        <sourceDirectory>${src.dir}</sourceDirectory>
+    </build>
+    
+</project>
