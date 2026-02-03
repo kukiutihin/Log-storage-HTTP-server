@@ -7,12 +7,14 @@ import java.util.Map;
 
 public enum Status {
     OK(Series.SUCCESS, "OK", 200),
-    CREATED(Series.SUCCESS, "Created", 201),
     ACCEPTED(Series.SUCCESS, "Accepted", 202),
 
     BAD_REQUEST(Series.CLIENT_ERROR, "Bad request", 400),
     NOT_FOUND(Series.CLIENT_ERROR, "Not found", 404),
-    TOO_LARGE(Series.CLIENT_ERROR, "Payload too large", 413)
+    TOO_LARGE(Series.CLIENT_ERROR, "Payload too large", 413),
+
+    SERVER_ERROR(Series.SERVER_ERROR, "What`s going on", 500),
+    NOT_IMPLEMENTED(Series.SERVER_ERROR, "Sorry, not implemented", 501)
 
     ;
 

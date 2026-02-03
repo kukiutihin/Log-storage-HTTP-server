@@ -1,7 +1,8 @@
-package server;
+package server.processing;
 
 import server.models.Request;
 import server.models.Method;
+import server.interfaces.RequestBuilderI;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -15,11 +16,10 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 
-public class RequestBuilder {
-    private static final System.Logger LOG = 
-        System.getLogger(RequestBuilder.class.getName());
-
-    static public Optional<Request> buildRequest(BufferedReader reader) {
+public class RequestBuilder implements RequestBuilderI {
+    
+    @Override
+    public Optional<Request> build(BufferedReader reader) {
         try {
             String rawFirst = reader.readLine();
             if (rawFirst == null || rawFirst.isBlank())
@@ -54,12 +54,12 @@ public class RequestBuilder {
         }
     }
 
-    static public Optional<Method> parseMethod(String raw) {
+    private Optional<Method> parseMethod(String raw) {
         String method = raw.trim().split(" ")[0];
         return Method.fromString(method.trim());
     }
 
-    static public Optional<List<String>> parsePath(String raw) {
+    private Optional<List<String>> parsePath(String raw) {
         List<String> rawChunks = Arrays.stream(raw.split(" "))
         .filter((s) -> !s.isEmpty())
         .toList();
@@ -78,7 +78,7 @@ public class RequestBuilder {
         }
     }
 
-    static public Optional<String> parseQuery(String raw) {
+    private Optional<String> parseQuery(String raw) {
         List<String> rawChunks = Arrays.stream(raw.split(" "))
         .filter((s) -> !s.isEmpty())
         .toList();
@@ -95,7 +95,7 @@ public class RequestBuilder {
         }
     }
 
-    static public Optional<Double> parseVersion(String raw) {
+    private Optional<Double> parseVersion(String raw) {
         List<String> rawChunks = Arrays.stream(raw.split(" "))
                 .filter((s) -> !s.isEmpty())
                 .toList();
@@ -116,7 +116,7 @@ public class RequestBuilder {
         }
     }
 
-    static public Optional<Map<String, String>> parseHeaders(BufferedReader reader) {
+    private Optional<Map<String, String>> parseHeaders(BufferedReader reader) {
         try {
             Map<String, String> headers = new HashMap<>();
             String header;
@@ -137,7 +137,7 @@ public class RequestBuilder {
         }
     }
     
-    static public Optional<char[]> parseBody(Map<String, String> headers, BufferedReader reader) {
+    private Optional<char[]> parseBody(Map<String, String> headers, BufferedReader reader) {
         try {
             if (headers.containsKey("Content-Length")) {
                 int bytes = Integer.parseInt(headers.get("Content-Length"));

@@ -47,6 +47,7 @@ buildNumber.properties
 .classpath
 
 ### VisualStudioCode ###
+.vscode
 .vscode/*
 
 # Local History for Visual Studio Code

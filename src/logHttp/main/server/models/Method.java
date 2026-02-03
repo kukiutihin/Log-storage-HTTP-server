@@ -3,7 +3,7 @@ package server.models;
 import java.util.Optional;
 
 public enum Method {
-    GET, POST, DELETE;
+    GET, HEAD, PUT, POST, PATCH, TRACE, OPTIONS, DELETE;
 
     static public Optional<Method> fromString(String method) {
         try {
