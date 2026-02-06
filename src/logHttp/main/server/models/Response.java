@@ -4,7 +4,7 @@ import java.util.Map;
 import java.util.Optional;
 
 public record Response(
-    Status status, 
+    EStatus status, 
     double version, 
     Map<String, String> headers, 
     Optional<String> body
@@ -27,3 +27,4 @@ public record Response(
         return toString().getBytes();
     }
 }
+    

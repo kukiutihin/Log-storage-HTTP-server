@@ -1,20 +1,24 @@
 import server.Server;
-import server.interfaces.RequestBuilderI;
-import server.interfaces.RequestHandlerI;
+import server.interfaces.IJsonHandler;
+import server.interfaces.IOptionsBuilder;
+import server.interfaces.IRequestBuilder;
+import server.interfaces.IRequestHandler;
+import server.processing.OptionsBuilder;
+import server.processing.JsonHandler;
 import server.processing.RequestBuilder;
 import server.processing.RequestHandler;
-
-import java.io.FileInputStream;
-
-import java.lang.System.Logger;
-import java.lang.System.Logger.Level;
-import java.util.Properties;
 
 import database.Database;
 import database.interfaces.DatabaseI;
 
+import java.io.FileInputStream;
+import java.lang.System.Logger;
+import java.lang.System.Logger.Level;
+import java.util.Properties;
+
+
 public class App {
-    static Logger LOG = System.getLogger(App.class.getName());
+    static private Logger LOG = System.getLogger(App.class.getName());
     public static void main(String[] args) {
         try (FileInputStream fis = new FileInputStream("config.properties")) {
             Properties config = new Properties();
@@ -25,18 +29,20 @@ public class App {
             String password = config.getProperty("db.password");
             DatabaseI database = new Database(url, user, password);
 
-            RequestBuilderI builder = new RequestBuilder();
-            RequestHandlerI handler = new RequestHandler(builder, database);
+            LOG.log(Level.INFO, "database connected");
+
+            IRequestBuilder builder = new RequestBuilder();
+            IOptionsBuilder optionsBuilder = new OptionsBuilder();
+            IJsonHandler jsonHandler = new JsonHandler();
+
+            IRequestHandler handler = new RequestHandler(builder, database, jsonHandler, optionsBuilder);
 
             Server server = new Server(1337, 8, handler);
+            LOG.log(Level.INFO, "server starting");
             server.start();
 
         } catch (Exception e) {
-            String trace = "";
-            for (var s : e.getStackTrace()) {
-                trace += s.toString() + "\n";
-            }
-            LOG.log(Level.ERROR, "Server crashed: {0}\nTrace: {1}", e.toString(), trace);
+            LOG.log(Level.ERROR, "server crashed: {0}", e.toString());
         }
     }
 }

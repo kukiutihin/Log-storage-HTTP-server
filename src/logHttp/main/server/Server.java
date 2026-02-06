@@ -2,28 +2,30 @@ package server;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.net.ServerSocket;
-import java.net.Socket;
-
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicLong;
 
 import java.lang.System.Logger;
 import java.lang.System.Logger.Level;
 
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.util.Optional;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicLong;
+
 import server.models.Response;
-import server.interfaces.RequestHandlerI;
+import server.interfaces.IRequestHandler;
+import utils.Context;
 
 public class Server {
     private ServerSocket serv;
     private ExecutorService executors;
-    private RequestHandlerI handler;
+    private IRequestHandler handler;
 
+    static private AtomicLong GEN = new AtomicLong(0);
     static private Logger LOG = System.getLogger(Server.class.getName());
-    static private AtomicLong GEN = new AtomicLong();
 
-    public Server(int port, int poolSize, RequestHandlerI handler) throws IOException {
+    public Server(int port, int poolSize, IRequestHandler handler) throws IOException {
         serv = new ServerSocket(port);
         executors = Executors.newFixedThreadPool(poolSize);
         this.handler = handler;
@@ -33,29 +35,31 @@ public class Server {
         while (true) {
             try {
                 Socket client;
-                client = serv.accept();
-
-                long id = GEN.incrementAndGet();
-                ClientContext context = new ClientContext(id);
-                
-                LOG.log(Level.INFO, "[{0}] connection accepted\n", context.to36String());
+                client = serv.accept();                
+                Context context = new Context(GEN.incrementAndGet());
+                LOG.log(Level.INFO, "[{0}] connection accepted", context.userId());
                 executors.submit(() -> respond(client, context));
 
             } catch (IOException e) {
-                LOG.log(Level.WARNING, "Failed to accept connection: {0}\n", e);
+                LOG.log(Level.WARNING, "failed to accept connection: {0}", e.toString());
             }
         }
     }
 
-    private void respond(Socket client, ClientContext context) {
+    private void respond(Socket client, Context context) {
         try (OutputStream out = client.getOutputStream()) {
-            Response response = handler.handle(client, context);
-            out.write(response.toBytes());
-            LOG.log(Level.INFO, "[{0}] success\n", context.to36String());
+            Optional<Response> response = handler.handle(client, context);
+            if (response.isEmpty()) {
+                LOG.log(Level.INFO, "[{0}] closing connection without response", context.userId());
+                return;
+            }
             
-        } catch (IOException e) {
-            LOG.log(Level.WARNING, "[{0}] client cancelled the connection: {1}\n", 
-                context.to36String(), e.toString());
+            out.write(response.get().toBytes());
+            LOG.log(Level.INFO, "[{0}] response was sent successfully", context.userId());
+            
+        } catch (Exception e) {
+            LOG.log(Level.WARNING, "[{0}] exception while processing request: {1}", 
+                context.userId(), e.toString());
         }
     }
 }

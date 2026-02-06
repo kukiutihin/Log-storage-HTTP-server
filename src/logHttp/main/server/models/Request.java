@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.Optional;
 
 public record Request(
-    Method method,
+    EMethod method,
     List<String> path,
     double version,
     Map<String, String> headers,

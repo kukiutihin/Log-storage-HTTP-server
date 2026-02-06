@@ -1,11 +1,16 @@
 package server.models;
 
-import java.util.Optional;
 import java.util.stream.Collectors;
+
+import utils.Err;
+import utils.ErrorType;
+import utils.Ok;
+import utils.Result;
+
 import java.util.Arrays;
 import java.util.Map;
 
-public enum Status {
+public enum EStatus {
     OK(Series.SUCCESS, "OK", 200),
     ACCEPTED(Series.SUCCESS, "Accepted", 202),
 
@@ -22,11 +27,11 @@ public enum Status {
     private final int code;
     private final String description;
 
-    private static final Map<Integer, Status> codeMap =
+    private static final Map<Integer, EStatus> codeMap =
         Arrays.stream(values())
             .collect(Collectors.toMap((s) -> s.code, (s) -> s));
 
-    private Status(Series series, String description, int code) {
+    private EStatus(Series series, String description, int code) {
         this.series = series;
         this.description = description;
         this.code = code;
@@ -40,8 +45,9 @@ public enum Status {
         return series != Series.CLIENT_ERROR && series != Series.SERVER_ERROR;
     }
 
-    static public Optional<Status> fromCode(int code) {
-        return Optional.ofNullable(codeMap.get(code));
+    static public Result<EStatus> fromCode(int code) {
+       if (codeMap.containsKey(code)) return new Ok<>(codeMap.get(code));
+       else return new Err<>("Failed to create Status from code: " + code, ErrorType.REAL_ERROR);
     }
 
     enum Series {
